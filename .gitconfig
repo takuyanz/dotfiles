@@ -1,0 +1,16 @@
+[core]
+	editor = /usr/local/bin/vim
+[user]
+  name = takuyanz
+  email = taku.matsumoto7@gmail.com
+[alias]
+  co = checkout
+  st = status
+  pl = pull
+  ps = push
+  br = branch
+  rv = remote -v
+  tree = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all -n 20
+
+[color]
+  ui = auto
