@@ -9,28 +9,32 @@ endif
 call neobundle#begin(expand('~/.vim/bundle/'))
 
 function! s:LoadBundles()
-  NeoBundleFetch 'Shougo/neobundle.vim'
+  NeoBundleFetch  'Shougo/neobundle.vim'
 
-  " 実行系
-  NeoBundleLazy 'thinca/vim-quickrun'
+  " 実行
+  NeoBundleLazy   'thinca/vim-quickrun'
 
   " 非同期処理
-  NeoBundle 'Shougo/vimproc.vim'
+  NeoBundle       'Shougo/vimproc.vim'
 
-  " 移動系
-  NeoBundle 'yonchu/accelerated-smooth-scroll'
-  NeoBundleLazy 'Lokaltog/vim-easymotion'
+  " 移動
+  NeoBundle       'yonchu/accelerated-smooth-scroll'
+  NeoBundleLazy   'Lokaltog/vim-easymotion'
 
-  " 入力系
-  NeoBundle "Shougo/neocomplete"
-  NeoBundle "kana/vim-smartinput"
+  " 入力
+  NeoBundle       'Shougo/neocomplete'
+  NeoBundle       'kana/vim-smartinput'
 
-  " 確認系
-  "NeoBundle "wookiehangover/jshint.vim"
+  " 確認
+  "NeoBundle      'wookiehangover/jshint.vim'
 
   " 表示系
-  NeoBundle 'thinca/vim-splash'
-  NeoBundle 'ntpeters/vim-better-whitespace'
+  NeoBundle       'thinca/vim-splash'
+  NeoBundle       'ntpeters/vim-better-whitespace'
+
+  " Git
+  NeoBundle       'rhysd/committia.vim'
+
 endfunction
 
 " TODO cacheの処理追加
@@ -63,6 +67,7 @@ if neobundle#tap('vim-quickrun')
           \      'exec': 'bundle exec %c %s'
           \    },
           \  }
+    set splitright
   endfunction
 
   nnoremap <silent><Leader>r :QuickRun<CR>
@@ -93,10 +98,10 @@ if neobundle#tap('neocomplete')
   inoremap <expr><C-e>  neocomplete#cancel_popup()
 
   " Enable heavy omni completion.
-  if !exists('g:neocomplete#force_omni_input_patterns')
-    let g:neocomplete#force_omni_input_patterns = {}
-  endif
-  let g:neocomplete#force_omni_input_patterns.ruby = '[^. *\t]\.\h\w*\|\h\w*::'
+  "if !exists('g:neocomplete#force_omni_input_patterns')
+    "let g:neocomplete#force_omni_input_patterns = {}
+  "endif
+  "let g:neocomplete#force_omni_input_patterns.ruby = '[^. *\t]\.\h\w*\|\h\w*::'
 
   call neobundle#untap()
 endif
@@ -129,6 +134,15 @@ endif
 " }}}
 " }}}
 
+" Git {{{
+" committia.vim {{{
+if neobundle#tap('committia.vim')
+
+  call neobundle#untap()
+endif
+" }}}
+" }}}
+
 " }}}
 
 " FileType  {{{
@@ -148,7 +162,36 @@ inoremap <C-j> <ESC>
 nnoremap <S-l> $
 nnoremap <S-h> ^
 
+nnoremap q: :q
+nnoremap <Space>w :w<CR>
+nnoremap <Space>q :q<CR>
 
+" Tab Split {{{
+nnoremap ss :split<Space>
+nnoremap sv :vsplit<Space>
+" 移動 {{{
+nnoremap  sh <C-w>h
+nnoremap  sj <C-w>j
+nnoremap  sk <C-w>k
+nnoremap  sl <C-w>l
+nnoremap  sw <C-w>w
+" }}}
+" ウィンドウの移動 {{{
+nnoremap  sH <C-w>H
+nnoremap  sJ <C-w>J
+nnoremap  sK <C-w>K
+nnoremap  sL <C-w>L
+nnoremap  sr <C-w>r
+" }}}
+" 大きさ変更 {{{
+nnoremap  s= <C-w>=
+" }}}
+" 閉じる {{{
+nnoremap :bd sQ
+" }}}
+" }}}
+
+" disable cursor keys
 nnoremap <Right> <Nop>
 nnoremap <Left>  <Nop>
 nnoremap <Up>    <Nop>
@@ -161,7 +204,6 @@ inoremap <Right> <Nop>
 inoremap <Left>  <Nop>
 inoremap <Up>    <Nop>
 inoremap <Down>  <Nop>
-
 " }}}
 
 " Other {{{
