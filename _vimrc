@@ -19,14 +19,18 @@ function! s:LoadBundles()
 
   " 移動
   NeoBundle       'yonchu/accelerated-smooth-scroll'
-  NeoBundleLazy   'Lokaltog/vim-easymotion'
+  NeoBundle       'Lokaltog/vim-easymotion'
+  NeoBundle       'scrooloose/nerdtree'
 
   " 入力
   NeoBundle       'Shougo/neocomplete'
+  NeoBundle       'Shougo/neosnippet'
+  NeoBundle       'Shougo/neosnippet-snippets'
   NeoBundle       'kana/vim-smartinput'
+  NeoBundle       'tpope/vim-surround'
 
   " 確認
-  "NeoBundle      'wookiehangover/jshint.vim'
+  NeoBundle       'scrooloose/syntastic'
 
   " 表示系
   NeoBundle       'thinca/vim-splash'
@@ -81,37 +85,73 @@ endif
 " neocomplete {{{
 if neobundle#tap('neocomplete')
   " 起動時に有効にする
+
   let g:neocomplete#enable_at_startup = 1
-  " 大文字と小文字が混在した場合に区別する
+  " 大文字が入力されるまで大文字小文字の区別を無視する
   let g:neocomplete#enable_smart_case = 1
-  " ポップアップ内に表示される候補の数
-  let g:neocomplete#max_list = 10
-  " 補完を行う最小文字数
+  " _(アンダースコア)区切りの補完を有効化
+  let g:neocomplete#enable_underbar_completion = 1
+  let g:neocomplete#enable_camel_case_completion =  1
+  " ポップアップメニューで表示される候補の数
+  let g:neocomplete#max_list = 5
+  " シンタックスをキャッシュするときの最小文字長
+  let g:neocomplete#sources#syntax#min_keyword_length = 3
+  " 補完を表示する最小文字数
   let g:neocomplete#auto_completion_start_length = 2
+  " preview window を閉じない
+  let g:neocomplete#enable_auto_close_preview = 0
+  let g:neocomplete#max_keyword_width = 50
 
   highlight Pmenu ctermbg=248
   highlight PmenuSel ctermbg=31
 
   inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-  inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-  inoremap <expr><C-y>  neocomplete#close_popup()
-  inoremap <expr><C-e>  neocomplete#cancel_popup()
+  inoremap <expr><BS>  neocomplete#smart_close_popup()."\<C-h>"
+  inoremap <expr><C-y> neocomplete#close_popup()
+  inoremap <expr><C-e> neocomplete#cancel_popup()
 
-  " Enable heavy omni completion.
-  "if !exists('g:neocomplete#force_omni_input_patterns')
-    "let g:neocomplete#force_omni_input_patterns = {}
-  "endif
-  "let g:neocomplete#force_omni_input_patterns.ruby = '[^. *\t]\.\h\w*\|\h\w*::'
+  call neocomplete#custom#source('include', 'disabled', 1)
+  call neobundle#untap()
+endif
+" }}}
+
+" neosnippet {{{
+if neobundle#tap('neosnippet')
+  "http://d.hatena.ne.jp/adragoona/20130929/1380437722
+  "http://qiita.com/muran001/items/4a8ffafb9c6564313893
+
+  imap <C-k> <Plug>(neosnippet_expand_or_jump)
+  imap <expr><TAB> neosnippet#jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : pumvisible() ? "\<C-n>" : "\<TAB>"
+endif
+" }}}
+" }}}
+
+" 確認系 {{{
+" syntastic {{{
+if neobundle#tap('syntastic')
+  let g:syntastic_enable_signs = 0
+  let g:syntastic_check_on_open = 0
+  let g:syntastic_check_on_wq = 1
+
+  let g:syntastic_javascript_checkers = ['jshint']
+  let g:syntastic_mode_map = {
+        \ 'mode': 'active',
+        \ 'active_filetypes': ['javascript'],
+        \ 'passive_filetypes': ['ruby']
+        \}
+  hi SyntasticWarning ctermbg=11
+  hi SyntasticError ctermbg=160
 
   call neobundle#untap()
 endif
+
 " }}}
 " }}}
 
 " 表示系 {{{
 " vimsplash {{{
 if neobundle#tap('vim-splash')
-  let g:splash#path = $HOME . '/randomFiles/splash.txt'
+  let g:splash#path = $HOME . '/dotfiles/splash.txt'
   autocmd BufReadPre * autocmd! plugin-splash VimEnter
   call neobundle#untap()
 endif
@@ -128,9 +168,19 @@ if neobundle#tap('vim-easymotion')
   \ })
 
   nmap e <Plug>(easymotion-s2)
+  let g:EasyMotion_space_jump_first = 1
+  call neobundle#untap()
+endif
+" }}}
+
+" nerdtree {{{
+if neobundle#tap('nerdtree')
+
+  nnoremap <silent><C-e> :NERDTreeToggle<CR>
 
   call neobundle#untap()
 endif
+
 " }}}
 " }}}
 
@@ -147,7 +197,7 @@ endif
 
 " FileType  {{{
 " Omni Completion
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+" autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 " When Rspec
 autocmd BufnewFile,Bufread *_spec.rb set filetype=ruby.rspec
 " }}}
@@ -234,4 +284,5 @@ set noerrorbells
 set wrap
 set foldmethod=marker
 set display=lastline
+set cursorline
 " }}}
