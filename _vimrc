@@ -23,9 +23,9 @@ function! s:LoadBundles()
   NeoBundle       'scrooloose/nerdtree'
 
   " 入力
-  NeoBundle       'Shougo/neocomplete'
-  NeoBundle       'Shougo/neosnippet'
-  NeoBundle       'Shougo/neosnippet-snippets'
+  "NeoBundle       'Shougo/neocomplete'
+  "NeoBundle       'Shougo/neosnippet'
+  "NeoBundle       'Shougo/neosnippet-snippets'
   NeoBundle       'kana/vim-smartinput'
   NeoBundle       'tpope/vim-surround'
 
@@ -87,18 +87,18 @@ if neobundle#tap('neocomplete')
   " 起動時に有効にする
 
   let g:neocomplete#enable_at_startup = 1
-  " 大文字が入力されるまで大文字小文字の区別を無視する
+  "大文字が入力されるまで大文字小文字の区別を無視する
   let g:neocomplete#enable_smart_case = 1
   " _(アンダースコア)区切りの補完を有効化
   let g:neocomplete#enable_underbar_completion = 1
   let g:neocomplete#enable_camel_case_completion =  1
-  " ポップアップメニューで表示される候補の数
+  "ポップアップメニューで表示される候補の数
   let g:neocomplete#max_list = 5
-  " シンタックスをキャッシュするときの最小文字長
+  "シンタックスをキャッシュするときの最小文字長
   let g:neocomplete#sources#syntax#min_keyword_length = 3
-  " 補完を表示する最小文字数
+  "補完を表示する最小文字数
   let g:neocomplete#auto_completion_start_length = 2
-  " preview window を閉じない
+  "preview window を閉じない
   let g:neocomplete#enable_auto_close_preview = 0
   let g:neocomplete#max_keyword_width = 50
 
@@ -137,7 +137,7 @@ if neobundle#tap('syntastic')
   let g:syntastic_mode_map = {
         \ 'mode': 'active',
         \ 'active_filetypes': ['javascript'],
-        \ 'passive_filetypes': ['ruby']
+        \ 'passive_filetypes': ['ruby', 'html']
         \}
   hi SyntasticWarning ctermbg=11
   hi SyntasticError ctermbg=160
@@ -284,5 +284,10 @@ set noerrorbells
 set wrap
 set foldmethod=marker
 set display=lastline
-set cursorline
+
+" vimdiffの色設定
+highlight DiffAdd    cterm=bold ctermfg=10 ctermbg=22
+highlight DiffDelete cterm=bold ctermfg=10 ctermbg=52
+highlight DiffChange cterm=bold ctermfg=10 ctermbg=17
+highlight DiffText   cterm=bold ctermfg=10 ctermbg=21
 " }}}
