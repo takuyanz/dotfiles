@@ -35,6 +35,7 @@ function! s:LoadBundles()
   " 表示系
   NeoBundle       'thinca/vim-splash'
   NeoBundle       'ntpeters/vim-better-whitespace'
+  NeoBundle       'apple-swift', {'type': 'nosync', 'base': '~/.vim/bundle/manual'}
 
   " Git
   NeoBundle       'rhysd/committia.vim'
