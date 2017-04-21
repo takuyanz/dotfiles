@@ -35,21 +35,11 @@ function! s:LoadBundles()
   " 表示系
   NeoBundle       'thinca/vim-splash'
   NeoBundle       'ntpeters/vim-better-whitespace'
-  NeoBundle       'apple-swift', {'type': 'nosync', 'base': '~/.vim/bundle/manual'}
 
   " Git
   NeoBundle       'rhysd/committia.vim'
 
 endfunction
-
-" TODO cacheの処理追加
-call s:LoadBundles()
-call neobundle#end()
-filetype plugin indent on  " Required
-
-NeoBundleCheck
-
-" }}}
 
 " Plugin Settings {{{
 
@@ -81,6 +71,43 @@ if neobundle#tap('vim-quickrun')
 endif
 " }}}
 " }}}
+
+" 移動系 {{{
+" easymotion {{{
+if neobundle#tap('vim-easymotion')
+  call neobundle#config({
+        \   'autoload': {
+        \     'mappings': ['<Plug>(easymotion-s2>']
+        \   }
+        \ })
+
+  nmap e <Plug>(easymotion-s2)
+  let g:EasyMotion_space_jump_first = 1
+  call neobundle#untap()
+endif
+" }}}
+
+" nerdtree {{{
+if neobundle#tap('nerdtree')
+
+  nnoremap <silent><C-e> :NERDTreeToggle<CR>
+
+  call neobundle#untap()
+endif
+
+" }}}
+" }}}
+
+
+" TODO cacheの処理追加
+call s:LoadBundles()
+call neobundle#end()
+filetype plugin indent on  " Required
+
+NeoBundleCheck
+
+" }}}
+
 
 " 入力系 {{{
 " neocomplete {{{
@@ -156,32 +183,6 @@ if neobundle#tap('vim-splash')
   autocmd BufReadPre * autocmd! plugin-splash VimEnter
   call neobundle#untap()
 endif
-" }}}
-" }}}
-
-" 移動系 {{{
-" easymotion {{{
-if neobundle#tap('vim-easymotion')
-  call neobundle#config({
-  \   'autoload': {
-  \     'mappings': ['<Plug>(easymotion-s2>']
-  \   }
-  \ })
-
-  nmap e <Plug>(easymotion-s2)
-  let g:EasyMotion_space_jump_first = 1
-  call neobundle#untap()
-endif
-" }}}
-
-" nerdtree {{{
-if neobundle#tap('nerdtree')
-
-  nnoremap <silent><C-e> :NERDTreeToggle<CR>
-
-  call neobundle#untap()
-endif
-
 " }}}
 " }}}
 
@@ -285,6 +286,11 @@ set noerrorbells
 set wrap
 set foldmethod=marker
 set display=lastline
+set cursorline
+
+" 現在の行番号をハイライト表示する
+hi clear CursorLine
+hi CursorLineNr term=bold   cterm=NONE ctermfg=228 ctermbg=NONE
 
 " vimdiffの色設定
 highlight DiffAdd    cterm=bold ctermfg=10 ctermbg=22
