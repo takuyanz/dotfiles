@@ -23,11 +23,13 @@ function! s:LoadBundles()
   NeoBundle       'scrooloose/nerdtree'
 
   " 入力
-  "NeoBundle       'Shougo/neocomplete'
-  "NeoBundle       'Shougo/neosnippet'
-  "NeoBundle       'Shougo/neosnippet-snippets'
+  NeoBundle       'Shougo/neocomplete'
+  NeoBundle       'Shougo/neosnippet'
+  NeoBundle       'Shougo/neosnippet-snippets'
   NeoBundle       'kana/vim-smartinput'
   NeoBundle       'tpope/vim-surround'
+  NeoBundle       'digitaltoad/vim-pug'
+  NeoBundle       'Quramy/tsuquyomi'
 
   " 確認
   NeoBundle       'scrooloose/syntastic'
@@ -35,6 +37,9 @@ function! s:LoadBundles()
   " 表示系
   NeoBundle       'thinca/vim-splash'
   NeoBundle       'ntpeters/vim-better-whitespace'
+  NeoBundle       'leafgarland/typescript-vim'
+  NeoBundle       'Shougo/context_filetype.vim'
+  NeoBundle       'osyo-manga/vim-precious'
 
   " Git
   NeoBundle       'rhysd/committia.vim'
@@ -138,7 +143,11 @@ if neobundle#tap('neocomplete')
   inoremap <expr><C-y> neocomplete#close_popup()
   inoremap <expr><C-e> neocomplete#cancel_popup()
 
-  call neocomplete#custom#source('include', 'disabled', 1)
+
+  "call neocomplete#custom#source('include', 'disabled', 1)
+  "call neocomplete#custom#source('tag', 'disabled_filetypes', {'ruby' : 1})
+  " autocmd FileType ruby NeoCompleteLock
+
   call neobundle#untap()
 endif
 " }}}
@@ -202,6 +211,7 @@ endif
 " autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 " When Rspec
 autocmd BufnewFile,Bufread *_spec.rb set filetype=ruby.rspec
+"autocmd BufNewFile,BufRead *.vue set filetype=html
 " }}}
 
 " Key Mappings {{{
@@ -287,6 +297,7 @@ set wrap
 set foldmethod=marker
 set display=lastline
 set cursorline
+set backupskip=/tmp/*,/private/tmp/*
 
 " 現在の行番号をハイライト表示する
 hi clear CursorLine
@@ -297,4 +308,6 @@ highlight DiffAdd    cterm=bold ctermfg=10 ctermbg=22
 highlight DiffDelete cterm=bold ctermfg=10 ctermbg=52
 highlight DiffChange cterm=bold ctermfg=10 ctermbg=17
 highlight DiffText   cterm=bold ctermfg=10 ctermbg=21
+au BufRead,BufNewFile,BufReadPre *.jade set filetype=pug
+au BufNewFile,BufRead *.json.jbuilder set ft=ruby
 " }}}
