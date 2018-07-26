@@ -56,6 +56,13 @@ inoremap <expr><BS>  neocomplete#smart_close_popup()."\<C-h>"
 inoremap <expr><C-y> neocomplete#close_popup()
 inoremap <expr><C-e> neocomplete#cancel_popup()
 
+" ========================================
+" neosinippet設定
+" ========================================
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
+
 " Key Mappings {{{
 cmap w!! w !sudo tee > /dev/null %
 
