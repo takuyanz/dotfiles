@@ -5,7 +5,7 @@ if &compatible
   set nocompatible
 endif
 
-set runtimepath+=~/.vim/dein/repos/github.com/Shougo/dein.vim
+set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
 
 call dein#begin(expand('~/.vim/dein'))
 
@@ -21,6 +21,8 @@ call dein#add('tpope/vim-surround')
 call dein#add('Lokaltog/vim-easymotion')
 call dein#add('kana/vim-smartinput')
 call dein#add('ntpeters/vim-better-whitespace')
+call dein#add('leafgarland/typescript-vim')
+call dein#add('jparise/vim-graphql')
 
 call dein#end()
 
@@ -155,4 +157,5 @@ hi CursorLineNr term=bold   cterm=NONE ctermfg=228 ctermbg=NONE
 au BufRead,BufNewFile,BufReadPre *.jade set filetype=pug
 au BufNewFile,BufRead *.json.jbuilder set ft=ruby
 filetype plugin indent on
+colorscheme default
 " }}}
