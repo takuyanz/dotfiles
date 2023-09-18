@@ -12,7 +12,7 @@ call dein#begin(expand('~/.vim/dein'))
 call dein#add('Shougo/dein.vim')
 call dein#add('Shougo/vimproc.vim', {'build': 'make'})
 
-call dein#add('Shougo/neocomplete.vim')
+"call dein#add('Shougo/neocomplete.vim')
 call dein#add('Shougo/neosnippet.vim')
 call dein#add('Shougo/neosnippet-snippets')
 call dein#add('Shougo/context_filetype.vim')
@@ -23,6 +23,23 @@ call dein#add('kana/vim-smartinput')
 call dein#add('ntpeters/vim-better-whitespace')
 call dein#add('leafgarland/typescript-vim')
 call dein#add('jparise/vim-graphql')
+call dein#add('Shougo/ddc.vim')
+call dein#add('vim-denops/denops.vim')
+
+if !has('nvim')
+  call dein#add('roxma/nvim-yarp')
+  call dein#add('roxma/vim-hug-neovim-rpc')
+endif
+
+" Install your UIs
+call dein#add('Shougo/ddc-ui-native')
+
+" Install your sources
+call dein#add('Shougo/ddc-source-around')
+
+" Install your filters
+call dein#add('Shougo/ddc-matcher_head')
+call dein#add('Shougo/ddc-sorter_rank')
 
 call dein#end()
 
@@ -31,32 +48,64 @@ if dein#check_install()
 endif
 
 " ========================================
-" neocomplete設定
+" deoplete設定
 " ========================================
 
-let g:neocomplete#enable_at_startup = 1
-"大文字が入力されるまで大文字小文字の区別を無視する
-let g:neocomplete#enable_smart_case = 1
-" _(アンダースコア)区切りの補完を有効化
-let g:neocomplete#enable_underbar_completion = 1
-let g:neocomplete#enable_camel_case_completion =  1
-"ポップアップメニューで表示される候補の数
-let g:neocomplete#max_list = 5
-"シンタックスをキャッシュするときの最小文字長
-let g:neocomplete#sources#syntax#min_keyword_length = 3
-"補完を表示する最小文字数
-let g:neocomplete#auto_completion_start_length = 2
-"preview window を閉じない
-let g:neocomplete#enable_auto_close_preview = 0
-let g:neocomplete#max_keyword_width = 50
+call ddc#custom#patch_global('ui', 'native')
 
-highlight Pmenu ctermbg=248
-highlight PmenuSel ctermbg=31
+" Use around source.
+" https://github.com/Shougo/ddc-source-around
+call ddc#custom#patch_global('sources', ['around'])
 
+" Use matcher_head and sorter_rank.
+" https://github.com/Shougo/ddc-matcher_head
+" https://github.com/Shougo/ddc-sorter_rank
+call ddc#custom#patch_global('sourceOptions', #{
+      \ _: #{
+      \   matchers: ['matcher_head'],
+      \   sorters: ['sorter_rank']},
+      \ })
+
+" Mappings
+
+" <TAB>: completion.
+inoremap <silent><expr> <TAB>
+\ pumvisible() ? '<C-n>' :
+\ (col('.') <= 1 <Bar><Bar> getline('.')[col('.') - 2] =~# '\s') ?
+\ '<TAB>' : ddc#map#manual_complete()
+
+" <S-TAB>: completion back.
+inoremap <expr><S-TAB>  pumvisible() ? '<C-p>' : '<C-h>'
+
+" Use ddc.
+call ddc#enable()
+
+"let g:deoplete#enable_at_startup = 1
+"call deoplete#custom#option("max_list", 5)
+"call deoplete#custom#option("min_pattern_length", 2)
+
+""大文字が入力されるまで大文字小文字の区別を無視する
+"let g:neocomplete#enable_smart_case = 1
+"" _(アンダースコア)区切りの補完を有効化
+"let g:neocomplete#enable_underbar_completion = 1
+"let g:neocomplete#enable_camel_case_completion =  1
+""ポップアップメニューで表示される候補の数
+"let g:neocomplete#max_list = 5
+""シンタックスをキャッシュするときの最小文字長
+"let g:neocomplete#sources#syntax#min_keyword_length = 3
+""補完を表示する最小文字数
+"let g:neocomplete#auto_completion_start_length = 2
+""preview window を閉じない
+"let g:neocomplete#enable_auto_close_preview = 0
+"let g:neocomplete#max_keyword_width = 50
+"
+"highlight Pmenu ctermbg=248
+"highlight PmenuSel ctermbg=31
+"
 inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-inoremap <expr><BS>  neocomplete#smart_close_popup()."\<C-h>"
-inoremap <expr><C-y> neocomplete#close_popup()
-inoremap <expr><C-e> neocomplete#cancel_popup()
+"inoremap <expr><BS>  neocomplete#smart_close_popup()."\<C-h>"
+"inoremap <expr><C-y> neocomplete#close_popup()
+"inoremap <expr><C-e> neocomplete#cancel_popup()
 
 " ========================================
 " neosinippet設定
