@@ -1,159 +1,316 @@
-" encoding
+" ========================================
+" Encoding settings (must be at the top)
+" ========================================
 set encoding=utf-8
+scriptencoding utf-8
 
 if &compatible
   set nocompatible
 endif
 
+" ========================================
+" Plugin Manager Setup (Dein.vim)
+" ========================================
+let s:dein_base = expand('~/.cache/dein')
+let s:dein_src = s:dein_base . '/repos/github.com/Shougo/dein.vim'
 set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
 
-call dein#begin(expand('~/.vim/dein'))
+" Auto-install dein.vim if not present
+if !isdirectory(s:dein_src)
+  call system('git clone https://github.com/Shougo/dein.vim ' . s:dein_src)
+endif
 
+call dein#begin(s:dein_base)
+
+" Core plugins
 call dein#add('Shougo/dein.vim')
 call dein#add('Shougo/vimproc.vim', {'build': 'make'})
 
-"call dein#add('Shougo/neocomplete.vim')
+" ========================================
+" Denops & ddc.vim (modern autocomplete)
+" ========================================
+" IMPORTANT: Requires Deno to be installed
+" Install from: https://deno.land/
+call dein#add('vim-denops/denops.vim')
+call dein#add('Shougo/ddc.vim')
+
+" ddc UI plugins - multiple options for better experience
+call dein#add('Shougo/ddc-ui-native')  " Native UI
+call dein#add('Shougo/ddc-ui-pum')     " Popup menu UI (recommended)
+call dein#add('Shougo/pum.vim')        " Required for ddc-ui-pum
+
+" ddc sources - various completion sources
+call dein#add('Shougo/ddc-source-around')    " Words from current buffer
+call dein#add('LumaKernel/ddc-source-file')  " File path completion
+call dein#add('Shougo/ddc-source-cmdline')   " Command line completion
+call dein#add('Shougo/ddc-source-input')     " Input history
+call dein#add('Shougo/ddc-source-omni')      " Omni completion
+call dein#add('matsui54/ddc-buffer')         " Better buffer word completion
+
+" ddc filters - for matching and sorting
+call dein#add('Shougo/ddc-filter-matcher_head')     " Head matching
+call dein#add('Shougo/ddc-filter-matcher_length')   " Length-based matching
+call dein#add('Shougo/ddc-filter-sorter_rank')      " Smart ranking
+call dein#add('Shougo/ddc-filter-converter_remove_overlap')  " Remove duplicates
+
+" Snippet support
 call dein#add('Shougo/neosnippet.vim')
 call dein#add('Shougo/neosnippet-snippets')
+
+" ========================================
+" Language support & utilities
+" ========================================
 call dein#add('Shougo/context_filetype.vim')
-call dein#add('yonchu/accelerated-smooth-scroll')
-call dein#add('tpope/vim-surround')
-call dein#add('Lokaltog/vim-easymotion')
-call dein#add('kana/vim-smartinput')
-call dein#add('ntpeters/vim-better-whitespace')
 call dein#add('leafgarland/typescript-vim')
 call dein#add('jparise/vim-graphql')
-call dein#add('Shougo/ddc.vim')
-call dein#add('vim-denops/denops.vim')
+call dein#add('pangloss/vim-javascript')
+call dein#add('maxmellon/vim-jsx-pretty')
 
+" ========================================
+" Editor enhancements
+" ========================================
+call dein#add('yonchu/accelerated-smooth-scroll')
+call dein#add('tpope/vim-surround')
+call dein#add('easymotion/vim-easymotion')  " Updated repository
+call dein#add('kana/vim-smartinput')
+call dein#add('ntpeters/vim-better-whitespace')
+call dein#add('tpope/vim-commentary')  " Easy commenting
+call dein#add('jiangmiao/auto-pairs')  " Auto-close brackets
+
+" Compatibility layers for older Vim
 if !has('nvim')
   call dein#add('roxma/nvim-yarp')
   call dein#add('roxma/vim-hug-neovim-rpc')
 endif
 
-" Install your UIs
-call dein#add('Shougo/ddc-ui-native')
-
-" Install your sources
-call dein#add('Shougo/ddc-source-around')
-
-" Install your filters
-call dein#add('Shougo/ddc-matcher_head')
-call dein#add('Shougo/ddc-sorter_rank')
-
 call dein#end()
 
+" Auto-install missing plugins on startup
 if dein#check_install()
   call dein#install()
 endif
 
 " ========================================
-" deoplete設定
+" ddc.vim Configuration (Modern Autocomplete)
 " ========================================
 
-call ddc#custom#patch_global('ui', 'native')
+" Check if Deno is installed before trying to use ddc
+let s:deno_available = executable('deno')
 
-" Use around source.
-" https://github.com/Shougo/ddc-source-around
-call ddc#custom#patch_global('sources', ['around'])
+if s:deno_available
+  " Only configure ddc if Deno is available
+  
+  " Silently check denops status without displaying messages
+  silent! call denops#server#status()
 
-" Use matcher_head and sorter_rank.
-" https://github.com/Shougo/ddc-matcher_head
-" https://github.com/Shougo/ddc-sorter_rank
-call ddc#custom#patch_global('sourceOptions', #{
+" Set the UI - using pum for best experience
+try
+  call ddc#custom#patch_global('ui', 'pum')
+catch
+  " Fallback to native if pum is not available
+  try
+    call ddc#custom#patch_global('ui', 'native')
+  catch
+  endtry
+endtry
+
+" Configure multiple completion sources
+try
+  call ddc#custom#patch_global('sources', [
+        \ 'around',
+        \ 'buffer',
+        \ 'file',
+        \ ])
+catch
+endtry
+
+" Global source options
+try
+  call ddc#custom#patch_global('sourceOptions', #{
       \ _: #{
+      \   ignoreCase: v:true,
       \   matchers: ['matcher_head'],
-      \   sorters: ['sorter_rank']},
+      \   sorters: ['sorter_rank'],
+      \   converters: ['converter_remove_overlap'],
+      \   minAutoCompleteLength: 2,
+      \   timeout: 500,
+      \ },
+      \ around: #{
+      \   mark: '[A]',
+      \   matchers: ['matcher_head'],
+      \ },
+      \ buffer: #{
+      \   mark: '[B]',
+      \ },
+      \ file: #{
+      \   mark: '[F]',
+      \   isVolatile: v:true,
+      \   minAutoCompleteLength: 2,
+      \   forceCompletionPattern: '\.\w*|:\w*|/\w*',
+      \ },
       \ })
+catch
+endtry
 
-" Mappings
+" Source-specific parameters
+try
+  call ddc#custom#patch_global('sourceParams', #{
+      \ around: #{
+      \   maxSize: 500,
+      \ },
+      \ buffer: #{
+      \   requireSameFiletype: v:false,
+      \   limitBytes: 5000000,
+      \   fromAltBuf: v:true,
+      \   forceCollect: v:true,
+      \ },
+      \ })
+catch
+endtry
 
-" <TAB>: completion.
-inoremap <silent><expr> <TAB>
-\ pumvisible() ? '<C-n>' :
-\ (col('.') <= 1 <Bar><Bar> getline('.')[col('.') - 2] =~# '\s') ?
-\ '<TAB>' : ddc#map#manual_complete()
+" Configure pum.vim (popup menu)
+try
+  call pum#set_option(#{
+        \ auto_select: v:false,
+        \ border: 'single',
+        \ max_height: 20,
+        \ min_height: 3,
+        \ padding: v:false,
+        \ preview: v:true,
+        \ scrollbar_char: '│',
+        \ })
+catch
+  " Ignore if pum is not available
+endtry
 
-" <S-TAB>: completion back.
-inoremap <expr><S-TAB>  pumvisible() ? '<C-p>' : '<C-h>'
+  " ========================================
+  " Key Mappings for ddc.vim
+  " ========================================
+  
+  " TAB: Smart completion and navigation
+  inoremap <silent><expr> <TAB>
+        \ pum#visible() ? '<Cmd>call pum#map#insert_relative(+1)<CR>' :
+        \ (col('.') <= 1 <Bar><Bar> getline('.')[col('.') - 2] =~# '\s') ?
+        \ '<TAB>' : ddc#map#manual_complete()
+  
+  " Shift-TAB: Navigate backwards in completion menu
+  inoremap <expr><S-TAB> pum#visible() ? '<Cmd>call pum#map#insert_relative(-1)<CR>' : '<C-h>'
+  
+  " Enter: Confirm completion
+  inoremap <silent><expr> <CR>
+        \ pum#visible() ? '<Cmd>call pum#map#confirm()<CR>' : '<CR>'
+  
+  " Ctrl-E: Cancel completion
+  inoremap <expr><C-e> pum#visible() ? '<Cmd>call pum#map#cancel()<CR>' : '<End>'
+  
+  " Ctrl-Y: Confirm completion (alternative)
+  inoremap <expr><C-y> pum#visible() ? '<Cmd>call pum#map#confirm()<CR>' : '<C-y>'
+  
+  " Ctrl-Space: Force trigger completion
+  inoremap <expr><C-Space> ddc#map#manual_complete()
 
-" Use ddc.
-call ddc#enable()
+" Enable ddc.vim only if denops is available
+try
+  if exists('*denops#server#status') && s:deno_available
+    call ddc#enable()
+    " Performance settings - increase delay to reduce server load
+    call ddc#custom#patch_global('autoCompleteDelay', 150)
+    call ddc#custom#patch_global('backspaceCompletion', v:true)
+  endif
+catch
+  " Silently ignore if ddc is not available
+endtry
 
-"let g:deoplete#enable_at_startup = 1
-"call deoplete#custom#option("max_list", 5)
-"call deoplete#custom#option("min_pattern_length", 2)
-
-""大文字が入力されるまで大文字小文字の区別を無視する
-"let g:neocomplete#enable_smart_case = 1
-"" _(アンダースコア)区切りの補完を有効化
-"let g:neocomplete#enable_underbar_completion = 1
-"let g:neocomplete#enable_camel_case_completion =  1
-""ポップアップメニューで表示される候補の数
-"let g:neocomplete#max_list = 5
-""シンタックスをキャッシュするときの最小文字長
-"let g:neocomplete#sources#syntax#min_keyword_length = 3
-""補完を表示する最小文字数
-"let g:neocomplete#auto_completion_start_length = 2
-""preview window を閉じない
-"let g:neocomplete#enable_auto_close_preview = 0
-"let g:neocomplete#max_keyword_width = 50
-"
-"highlight Pmenu ctermbg=248
-"highlight PmenuSel ctermbg=31
-"
-inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-"inoremap <expr><BS>  neocomplete#smart_close_popup()."\<C-h>"
-"inoremap <expr><C-y> neocomplete#close_popup()
-"inoremap <expr><C-e> neocomplete#cancel_popup()
+else
+  " Fallback key mappings when Deno/ddc is not available
+  " Simple TAB completion using built-in completion
+  inoremap <expr> <TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
+  inoremap <expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+  inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
+  inoremap <expr> <C-e> pumvisible() ? "\<C-e>" : "\<End>"
+endif " End of Deno/ddc configuration
 
 " ========================================
-" neosinippet設定
+" Neosnippet Configuration
 " ========================================
+" Plugin key-mappings
 imap <C-k>     <Plug>(neosnippet_expand_or_jump)
 smap <C-k>     <Plug>(neosnippet_expand_or_jump)
 xmap <C-k>     <Plug>(neosnippet_expand_target)
 
-" Key Mappings {{{
+" For conceal markers
+if has('conceal')
+  set conceallevel=2 concealcursor=niv
+endif
+
+" Enable snipMate compatibility feature
+let g:neosnippet#enable_snipmate_compatibility = 1
+
+" ========================================
+" Key Mappings
+" ========================================
+" Sudo write (for files opened without sudo)
 cmap w!! w !sudo tee > /dev/null %
 
+" Clear search highlighting with double Escape
 noremap <silent> <Esc><Esc> :nohlsearch<CR>
-nnoremap <silent> <C-h> :<C-u>tabprevious<CR>
 
+" Tab navigation
+nnoremap <silent> <C-h> :<C-u>tabprevious<CR>
+nnoremap <silent> <C-l> :<C-u>tabnext<CR>
+
+" Quick escape from insert mode
 inoremap <C-j> <ESC>
+inoremap jj <ESC>
+
+" Quick line navigation
 nnoremap <S-l> $
 nnoremap <S-h> ^
 
+" Prevent accidental command history
 nnoremap q: :q
+
+" Quick save and quit
 nnoremap <Space>w :w<CR>
 nnoremap <Space>q :q<CR>
+nnoremap <Space>x :x<CR>
 
-" Tab Split {{{
+" ========================================
+" Window Management
+" ========================================
+" Split windows
 nnoremap ss :split<Space>
 nnoremap sv :vsplit<Space>
-" 移動 {{{
-nnoremap  sh <C-w>h
-nnoremap  sj <C-w>j
-nnoremap  sk <C-w>k
-nnoremap  sl <C-w>l
-nnoremap  sw <C-w>w
-" }}}
-" ウィンドウの移動 {{{
-nnoremap  sH <C-w>H
-nnoremap  sJ <C-w>J
-nnoremap  sK <C-w>K
-nnoremap  sL <C-w>L
-nnoremap  sr <C-w>r
-" }}}
-" 大きさ変更 {{{
-nnoremap  s= <C-w>=
-" }}}
-" 閉じる {{{
-nnoremap :bd sQ
-" }}}
-" }}}
+nnoremap st :tabnew<Space>
 
-" disable cursor keys
+" Navigate between windows
+nnoremap sh <C-w>h
+nnoremap sj <C-w>j
+nnoremap sk <C-w>k
+nnoremap sl <C-w>l
+nnoremap sw <C-w>w
+
+" Move windows
+nnoremap sH <C-w>H
+nnoremap sJ <C-w>J
+nnoremap sK <C-w>K
+nnoremap sL <C-w>L
+nnoremap sr <C-w>r
+
+" Resize windows
+nnoremap s= <C-w>=
+nnoremap s> <C-w>>
+nnoremap s< <C-w><
+nnoremap s+ <C-w>+
+nnoremap s- <C-w>-
+
+" Close windows
+nnoremap sq :q<CR>
+nnoremap sQ :bd<CR>
+
+" ========================================
+" Disable Arrow Keys (Force Vim Navigation)
+" ========================================
 nnoremap <Right> <Nop>
 nnoremap <Left>  <Nop>
 nnoremap <Up>    <Nop>
@@ -166,45 +323,112 @@ inoremap <Right> <Nop>
 inoremap <Left>  <Nop>
 inoremap <Up>    <Nop>
 inoremap <Down>  <Nop>
-" }}}
 
-" Other {{{
-syntax on
-set encoding=utf-8
-set number
-set tabstop=2
-set ambiwidth=double
-set number
-set title
-set tabstop=2
-set shiftwidth=2
-set autoindent
-set expandtab
-set smartindent
-set backspace=indent,eol,start
-set showmatch
-set matchtime=3
-set incsearch
-set hlsearch
-set ignorecase
-set smartcase
-set viminfo-=h
-set autoread
-set noswapfile
+" ========================================
+" General Vim Settings
+" ========================================
+" Enable syntax highlighting
+syntax enable
+filetype plugin indent on
+
+" Display settings
+set number              " Show line numbers
+set norelativenumber    " Disable relative numbers to fix scrolling issues
+set signcolumn=yes      " Always show sign column to prevent shifting
+set title               " Show file title in terminal
+set nocursorline        " Disable cursorline to prevent display issues
+set showmatch           " Show matching brackets
+set matchtime=3         " Bracket match time
+set wrap                " Wrap long lines
+set display=lastline    " Show as much as possible of the last line
+set ambiwidth=double    " Handle double-width characters
+
+" Indentation settings
+set tabstop=2           " Tab width
+set shiftwidth=2        " Indent width
+set softtabstop=2       " Soft tab width
+set expandtab           " Use spaces instead of tabs
+set autoindent          " Auto indent
+set smartindent         " Smart indent
+
+" Search settings
+set incsearch           " Incremental search
+set hlsearch            " Highlight search results
+set ignorecase          " Case insensitive search
+set smartcase           " Smart case search
+
+" Editor behavior
+set backspace=indent,eol,start  " Better backspace behavior
+set autoread            " Auto-reload changed files
+set noswapfile          " Disable swap files
+set nobackup            " Disable backup files
+set undofile            " Enable persistent undo
+set undodir=~/.vim/undo " Undo directory
+set viminfo-=h          " Don't highlight on startup
+set hidden              " Allow hidden buffers
+set mouse=a             " Enable mouse support
+set clipboard=unnamed   " Use system clipboard
+
+" Performance settings
+set lazyredraw          " Don't redraw during macros
+set ttyfast             " Fast terminal connection
+set updatetime=300      " Faster completion
+set timeoutlen=500      " Faster key sequence completion
+
+" Disable bells
 set visualbell t_vb=
 set noerrorbells
-set wrap
-set foldmethod=marker
-set display=lastline
-set cursorline
+
+" Folding
+set foldmethod=marker   " Use markers for folding
+set foldlevel=99        " Open all folds by default
+
+" File-specific settings
 set backupskip=/tmp/*,/private/tmp/*
 
-" 現在の行番号をハイライト表示する
-hi clear CursorLine
-hi CursorLineNr term=bold   cterm=NONE ctermfg=228 ctermbg=NONE
+" ========================================
+" UI Customization
+" ========================================
+" Highlight line numbers
+hi LineNr ctermfg=240
+hi CursorLineNr term=bold cterm=bold ctermfg=228
 
-au BufRead,BufNewFile,BufReadPre *.jade set filetype=pug
-au BufNewFile,BufRead *.json.jbuilder set ft=ruby
-filetype plugin indent on
+" Popup menu colors
+hi Pmenu ctermbg=235 ctermfg=250
+hi PmenuSel ctermbg=31 ctermfg=255
+hi PmenuSbar ctermbg=236
+hi PmenuThumb ctermbg=239
+
+" ========================================
+" Filetype Settings
+" ========================================
+augroup FileTypeSettings
+  autocmd!
+  " Jade/Pug files
+  autocmd BufRead,BufNewFile,BufReadPre *.jade set filetype=pug
+  " JSON Builder files
+  autocmd BufNewFile,BufRead *.json.jbuilder set ft=ruby
+  " TypeScript/JavaScript
+  autocmd BufNewFile,BufRead *.ts,*.tsx set filetype=typescript
+  autocmd BufNewFile,BufRead *.js,*.jsx set filetype=javascript
+  " GraphQL
+  autocmd BufNewFile,BufRead *.graphql,*.gql set filetype=graphql
+augroup END
+
+" Color scheme
 colorscheme default
-" }}}
+
+" ========================================
+" Status Line
+" ========================================
+set laststatus=2        " Always show status line
+set statusline=%F       " Full file path
+set statusline+=%m      " Modified flag
+set statusline+=%r      " Read only flag
+set statusline+=%h      " Help buffer flag
+set statusline+=%=      " Right align
+set statusline+=%y      " File type
+set statusline+=[%{&fileencoding}]  " File encoding
+set statusline+=[%l/%L] " Current line / Total lines
+set statusline+=[%p%%]  " Percentage through file
+set statusline+=[%c]    " Column number
